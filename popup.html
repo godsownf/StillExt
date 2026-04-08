@@ -2,96 +2,269 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Ultimate Fingerprint Spoofer</title>
-<link rel="stylesheet" href="styles.css" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fingerprint Spoofer</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    width: 350px;
+    padding: 10px;
+    background-color: #f0f0f0;
+  }
+  h1 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  button, select {
+    width: 100%;
+    margin: 5px 0;
+    padding: 8px;
+  }
+  #status {
+    margin-top: 10px;
+    font-size: 14px;
+    height: 20px;
+  }
+  textarea {
+    width: 100%;
+    height: 80px;
+  }
+</style>
 </head>
 <body>
-<h3>Ultimate Fingerprint Spoofer</h3>
+<h1>Fingerprint Spoofer</h1>
 
-<div class="section">
-  <label for="presetSelect">Presets</label>
-  <select id="presetSelect">
-    <option value="custom">Custom</option>
-    <option value="sample1">Sample 1</option>
-    <option value="sample2">Sample 2</option>
-    <option value="recent">Recent</option>
-  </select>
-</div>
+<button id="applyBtn">Apply Current Settings</button>
+<button id="setBtn">Save Settings</button>
+<button id="clearBtn">Clear Settings</button>
 
-<div class="section">
-  <button id="setBtn">Save Settings</button>
-  <button id="clearBtn">Clear Settings</button>
-  <button id="applyBtn">Apply Settings</button>
-</div>
+<h3>Presets</h3>
+<select id="presetSelect">
+  <option value="custom">Custom</option>
+  <option value="recent">Recent</option>
+  <option value="preset1">Preset 1</option>
+  <option value="preset2">Preset 2</option>
+</select>
 
-<div class="section" id="configForm">
-  <label for="userAgent">User Agent</label>
-  <input type="text" id="userAgent" />
-
-  <label for="languages">Languages</label>
-  <input type="text" id="languages" />
-
-  <label for="hardwareConcurrency">Hardware Concurrency</label>
-  <input type="text" id="hardwareConcurrency" />
-
-  <label for="deviceMemory">Device Memory (GB)</label>
-  <input type="text" id="deviceMemory" />
-
-  <label for="pixelRatio">Pixel Ratio</label>
-  <input type="text" id="pixelRatio" />
-
-  <label for="screenWidth">Screen Width</label>
-  <input type="text" id="screenWidth" />
-
-  <label for="screenHeight">Screen Height</label>
-  <input type="text" id="screenHeight" />
-
-  <label for="colorDepth">Color Depth</label>
-  <input type="text" id="colorDepth" />
-
-  <label for="plugins">Plugins</label>
-  <input type="text" id="plugins" />
-
-  <label for="mimeTypes">Mime Types</label>
-  <input type="text" id="mimeTypes" />
-
-  <label for="canvasNoise">Canvas Noise</label>
-  <input type="checkbox" id="canvasNoise" />
-
-  <label for="webglVendor">WebGL Vendor</label>
-  <input type="text" id="webglVendor" />
-
-  <label for="webglRenderer">WebGL Renderer</label>
-  <input type="text" id="webglRenderer" />
-
-  <label for="audioInput">Audio Input</label>
-  <input type="text" id="audioInput" />
-
-  <label for="videoInput">Video Input</label>
-  <input type="text" id="videoInput" />
-
-  <label for="cookies">Cookies</label>
-  <input type="text" id="cookies" />
-</div>
-
-<div class="section" id="importExportContainer">
-  <h4>Import Settings</h4>
-  <textarea id="importTextarea" rows="4" cols="50" placeholder="Paste settings here"></textarea>
-  <label for="importFormat">Format</label>
-  <select id="importFormat">
-    <option value="json">JSON</option>
-    <option value="netscape">Netscape</option>
-  </select>
-  <button id="importBtn">Import</button>
-
-  <h4>Export Settings</h4>
-  <button id="exportNetscapeBtn">Export Netscape</button>
-  <button id="exportJsonBtn">Export JSON</button>
-</div>
+<h3>Import/Export</h3>
+<textarea id="importTextarea" placeholder="Paste import data here..."></textarea>
+<button id="importBtn">Import Settings</button>
+<button id="exportNetscapeBtn">Export Netscape Format</button>
+<button id="exportJsonBtn">Export JSON</button>
 
 <div id="status"></div>
 
-<script src="popup.js"></script>
+<script>
+const statusDiv = document.getElementById('status');
+
+function loadRecent() {
+  const recent = localStorage.getItem('recentConfig');
+  return recent ? JSON.parse(recent) : null;
+}
+
+function saveRecent(config) {
+  localStorage.setItem('recentConfig', JSON.stringify(config));
+}
+
+function loadCookies() {
+  const match = document.cookie.match(/fingerprintConfig=([^;]+)/);
+  if (match) {
+    const cookieStr = decodeURIComponent(match[1]);
+    const pairs = cookieStr.split('; ');
+    const config = {};
+    pairs.forEach(pair => {
+      const [k, v] = pair.split('=');
+      if (k && v !== undefined) {
+        config[k] = v;
+      }
+    });
+    return config;
+  }
+  return null;
+}
+
+function getCurrentConfig() {
+  return {
+    userAgent: document.getElementById('userAgent').value,
+    languages: document.getElementById('languages').value,
+    hardwareConcurrency: document.getElementById('hardwareConcurrency').value,
+    deviceMemory: document.getElementById('deviceMemory').value,
+    pixelRatio: document.getElementById('pixelRatio').value,
+    screenWidth: document.getElementById('screenWidth').value,
+    screenHeight: document.getElementById('screenHeight').value,
+    colorDepth: document.getElementById('colorDepth').value,
+    plugins: document.getElementById('plugins').value,
+    mimeTypes: document.getElementById('mimeTypes').value,
+    canvasNoise: document.getElementById('canvasNoise').checked,
+    webglVendor: document.getElementById('webglVendor').value,
+    webglRenderer: document.getElementById('webglRenderer').value,
+    audioInput: document.getElementById('audioInput').value,
+    videoInput: document.getElementById('videoInput').value,
+    cookies: document.getElementById('cookies').value
+  };
+}
+
+function loadConfig(config) {
+  if (!config) return;
+  document.getElementById('userAgent').value = config.userAgent || '';
+  document.getElementById('languages').value = config.languages || '';
+  document.getElementById('hardwareConcurrency').value = config.hardwareConcurrency || '';
+  document.getElementById('deviceMemory').value = config.deviceMemory || '';
+  document.getElementById('pixelRatio').value = config.pixelRatio || '';
+  document.getElementById('screenWidth').value = config.screenWidth || '';
+  document.getElementById('screenHeight').value = config.screenHeight || '';
+  document.getElementById('colorDepth').value = config.colorDepth || '';
+  document.getElementById('plugins').value = config.plugins || '';
+  document.getElementById('mimeTypes').value = config.mimeTypes || '';
+  document.getElementById('canvasNoise').checked = config.canvasNoise || false;
+  document.getElementById('webglVendor').value = config.webglVendor || '';
+  document.getElementById('webglRenderer').value = config.webglRenderer || '';
+  document.getElementById('audioInput').value = config.audioInput || '';
+  document.getElementById('videoInput').value = config.videoInput || '';
+  document.getElementById('cookies').value = config.cookies || '';
+}
+
+function saveSettings() {
+  const config = getCurrentConfig();
+  localStorage.setItem('savedConfig', JSON.stringify(config));
+  const cookieStr = Object.entries(config).map(([k, v]) => `${k}=${v}`).join('; ');
+  document.cookie = `fingerprintConfig=${encodeURIComponent(cookieStr)}; path=/; max-age=31536000`;
+  showStatus('Settings saved.');
+}
+
+function clearSettings() {
+  localStorage.removeItem('savedConfig');
+  document.cookie = "fingerprintConfig=; Max-Age=0; path=/";
+  showStatus('Settings cleared.');
+}
+
+function applyPreset(presetName) {
+  if (presetName === 'recent') {
+    const recent = loadRecent();
+    if (recent) {
+      loadConfig(recent);
+      showStatus('Recent configuration loaded.');
+    } else {
+      showStatus('No recent configuration found.');
+    }
+  } else if (presetName.startsWith('preset')) {
+    // For demo: preset1, preset2, etc.
+    // You can define actual preset configurations here
+    showStatus(`Preset "${presetName}" selected (not implemented).`);
+  } else {
+    showStatus(`Preset "${presetName}" not found.`);
+  }
+}
+
+function showStatus(msg) {
+  document.getElementById('status').innerText = msg;
+  setTimeout(() => { document.getElementById('status').innerText = ''; }, 3000);
+}
+
+function importSettings() {
+  const textarea = document.getElementById('importTextarea').value.trim();
+  const format = document.getElementById('importFormat').value;
+  let config = null;
+
+  if (format === 'json') {
+    try {
+      config = JSON.parse(textarea);
+    } catch (e) {
+      alert('Invalid JSON format.');
+      return;
+    }
+  } else if (format === 'netscape') {
+    config = {};
+    const pairs = textarea.split(';');
+    pairs.forEach(pair => {
+      const [k, v] = pair.trim().split('=');
+      if (k && v !== undefined) {
+        config[k.trim()] = v.trim();
+      }
+    });
+  }
+
+  if (config) {
+    loadConfig(config);
+    showStatus('Settings imported.');
+  }
+}
+
+function exportNetscape() {
+  const config = getCurrentConfig();
+  const str = Object.entries(config).map(([k, v]) => `${k}=${v}`).join('; ');
+  prompt('Netscape format:', str);
+}
+
+function exportJson() {
+  const config = getCurrentConfig();
+  const jsonStr = JSON.stringify(config, null, 2);
+  prompt('JSON format:', jsonStr);
+}
+
+// Event bindings
+document.getElementById('setBtn').addEventListener('click', () => {
+  saveSettings();
+});
+document.getElementById('clearBtn').addEventListener('click', () => {
+  clearSettings();
+});
+document.getElementById('applyBtn').addEventListener('click', () => {
+  saveRecent(getCurrentConfig());
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.scripting.sendMessage({ action: 'applySettings', settings: getCurrentConfig() });
+  });
+});
+document.getElementById('presetSelect').addEventListener('change', (e) => {
+  applyPreset(e.target.value);
+});
+document.getElementById('importBtn').addEventListener('click', () => {
+  importSettings();
+});
+document.getElementById('exportNetscapeBtn').addEventListener('click', () => {
+  exportNetscape();
+});
+document.getElementById('exportJsonBtn').addEventListener('click', () => {
+  exportJson();
+});
+
+// Initialize form
+function init() {
+  const saved = localStorage.getItem('savedConfig');
+  if (saved) {
+    loadConfig(JSON.parse(saved));
+  } else {
+    const cookiesConfig = loadCookies();
+    if (cookiesConfig) {
+      loadConfig(cookiesConfig);
+    }
+  }
+  const recent = loadRecent();
+  if (recent) {
+    loadConfig(recent);
+  }
+}
+init();
+</script>
+
+<!-- Input fields for your fingerprint settings -->
+<div style="margin-top:20px;">
+  <label>User Agent: <input id="userAgent" type="text" placeholder="User Agent" size="50"></label><br/>
+  <label>Languages: <input id="languages" type="text" placeholder="en-US,en" size="50"></label><br/>
+  <label>Hardware Concurrency: <input id="hardwareConcurrency" type="text" placeholder="4"></label><br/>
+  <label>Device Memory (GB): <input id="deviceMemory" type="text" placeholder="8"></label><br/>
+  <label>Pixel Ratio: <input id="pixelRatio" type="text" placeholder="1.0"></label><br/>
+  <label>Screen Width: <input id="screenWidth" type="text" placeholder="1920"></label><br/>
+  <label>Screen Height: <input id="screenHeight" type="text" placeholder="1080"></label><br/>
+  <label>Color Depth: <input id="colorDepth" type="text" placeholder="24"></label><br/>
+  <label>Plugins: <input id="plugins" type="text" placeholder="Plugin1, Plugin2"></label><br/>
+  <label>MIME Types: <input id="mimeTypes" type="text" placeholder="mime/type1, mime/type2"></label><br/>
+  <label>Canvas Noise: <input id="canvasNoise" type="checkbox"></label><br/>
+  <label>WebGL Vendor: <input id="webglVendor" type="text" placeholder="Vendor"></label><br/>
+  <label>WebGL Renderer: <input id="webglRenderer" type="text" placeholder="Renderer"></label><br/>
+  <label>Audio Input: <input id="audioInput" type="text" placeholder="Audio Device"></label><br/>
+  <label>Video Input: <input id="videoInput" type="text" placeholder="Video Device"></label><br/>
+  <label>Cookies: <input id="cookies" type="text" placeholder="Cookies"></label><br/>
+</div>
 </body>
 </html>
