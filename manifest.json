@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Ultimate Fingerprint Spoofer",
+  "name": "StillExt",
   "version": "1.0",
-  "description": "Advanced fingerprint spoofing extension with settings import/export.",
+  "description": "Advanced fingerprint spoofing extension with cookies.",
   "permissions": [
     "storage",
     "cookies",
