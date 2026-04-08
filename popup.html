@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ultimate Fingerprint Spoofer</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<h3>Ultimate Fingerprint Spoofer</h3>
+
+<div class="section">
+  <label for="presetSelect">Presets</label>
+  <select id="presetSelect">
+    <option value="custom">Custom</option>
+    <option value="sample1">Sample 1</option>
+    <option value="sample2">Sample 2</option>
+    <option value="recent">Recent</option>
+  </select>
+</div>
+
+<div class="section">
+  <button id="setBtn">Save Settings</button>
+  <button id="clearBtn">Clear Settings</button>
+  <button id="applyBtn">Apply Settings</button>
+</div>
+
+<div class="section" id="configForm">
+  <label for="userAgent">User Agent</label>
+  <input type="text" id="userAgent" />
+
+  <label for="languages">Languages</label>
+  <input type="text" id="languages" />
+
+  <label for="hardwareConcurrency">Hardware Concurrency</label>
+  <input type="text" id="hardwareConcurrency" />
+
+  <label for="deviceMemory">Device Memory (GB)</label>
+  <input type="text" id="deviceMemory" />
+
+  <label for="pixelRatio">Pixel Ratio</label>
+  <input type="text" id="pixelRatio" />
+
+  <label for="screenWidth">Screen Width</label>
+  <input type="text" id="screenWidth" />
+
+  <label for="screenHeight">Screen Height</label>
+  <input type="text" id="screenHeight" />
+
+  <label for="colorDepth">Color Depth</label>
+  <input type="text" id="colorDepth" />
+
+  <label for="plugins">Plugins</label>
+  <input type="text" id="plugins" />
+
+  <label for="mimeTypes">Mime Types</label>
+  <input type="text" id="mimeTypes" />
+
+  <label for="canvasNoise">Canvas Noise</label>
+  <input type="checkbox" id="canvasNoise" />
+
+  <label for="webglVendor">WebGL Vendor</label>
+  <input type="text" id="webglVendor" />
+
+  <label for="webglRenderer">WebGL Renderer</label>
+  <input type="text" id="webglRenderer" />
+
+  <label for="audioInput">Audio Input</label>
+  <input type="text" id="audioInput" />
+
+  <label for="videoInput">Video Input</label>
+  <input type="text" id="videoInput" />
+
+  <label for="cookies">Cookies</label>
+  <input type="text" id="cookies" />
+</div>
+
+<div class="section" id="importExportContainer">
+  <h4>Import Settings</h4>
+  <textarea id="importTextarea" rows="4" cols="50" placeholder="Paste settings here"></textarea>
+  <label for="importFormat">Format</label>
+  <select id="importFormat">
+    <option value="json">JSON</option>
+    <option value="netscape">Netscape</option>
+  </select>
+  <button id="importBtn">Import</button>
+
+  <h4>Export Settings</h4>
+  <button id="exportNetscapeBtn">Export Netscape</button>
+  <button id="exportJsonBtn">Export JSON</button>
+</div>
+
+<div id="status"></div>
+
+<script src="popup.js"></script>
+</body>
+</html>
