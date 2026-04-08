@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "StillExt",
+  "name": "https://github.com/godsownf",
   "version": "1.0",
+  "author": "1.0",
   "description": "Advanced fingerprint spoofing extension with cookies.",
   "permissions": [
     "storage",
