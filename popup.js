@@ -1,3 +1,20 @@
+// Load configuration from cookies
+function loadCookies() {
+  const match = document.cookie.match(/fingerprintConfig=([^;]+)/);
+  if (!match) return null;
+  try {
+    const raw = decodeURIComponent(match[1]);
+    const config = {};
+    raw.split(';').forEach(pair => {
+      const [k, v] = pair.trim().split('=');
+      if (k && v !== undefined) config[k.trim()] = v.trim();
+    });
+    return config;
+  } catch (e) {
+    return null;
+  }
+}
+
 // Load recent configuration from localStorage
 function loadRecent() {
   const recent = localStorage.getItem('recentConfig');
