@@ -1,0 +1,47 @@
+/* styles.css */
+
+body {
+  font-family: Arial, sans-serif;
+  padding: 10px;
+  width: 370px;
+}
+
+h3 {
+  margin-top: 0;
+}
+
+.section {
+  margin-top: 15px;
+}
+
+label {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+select, input[type="text"], button, textarea {
+  width: 100%;
+  padding: 5px;
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+button {
+  margin-top: 10px;
+}
+
+#status {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+#importExportContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+#importExportContainer > div {
+  margin-top: 10px;
+}
