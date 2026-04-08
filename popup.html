@@ -6,47 +6,41 @@
 <title>Fingerprint Spoofer</title>
 <style>
   body {
-  font-family: Arial, sans-serif;
-  padding: 10px;
-  width: 370px;
-  background-color: #f0f0f0;
-}
-
-h3 {
-  margin-top: 0;
-  text-align: center;
-}
-
-.section {
-  margin-top: 15px;
-}
-
-label {
-  display: block;
-  margin-top: 8px;
-  font-size: 14px;
-}
-
-input[type="text"], select, textarea {
-  width: 100%;
-  padding: 5px;
-  margin-top: 4px;
-  font-size: 14px;
-}
-
-button {
-  margin-top: 10px;
-  padding: 6px 12px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-#status {
-  margin-top: 10px;
-  font-weight: bold;
-  font-size: 14px;
-  height: 20px;
-}
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    width: 370px;
+    background-color: #f0f0f0;
+  }
+  h3 {
+    margin-top: 0;
+    text-align: center;
+  }
+  .section {
+    margin-top: 15px;
+  }
+  label {
+    display: block;
+    margin-top: 8px;
+    font-size: 14px;
+  }
+  input[type="text"], select, textarea {
+    width: 100%;
+    padding: 5px;
+    margin-top: 4px;
+    font-size: 14px;
+  }
+  button {
+    margin-top: 10px;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  #status {
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 14px;
+    height: 20px;
+  }
 </style>
 </head>
 <body>
@@ -66,35 +60,38 @@ button {
 
 <h3>Import/Export</h3>
 <textarea id="importTextarea" placeholder="Paste import data here..."></textarea>
+<select id="importFormat">
+  <option value="json">JSON</option>
+  <option value="netscape">Netscape</option>
+</select>
 <button id="importBtn">Import Settings</button>
 <button id="exportNetscapeBtn">Export Netscape Format</button>
 <button id="exportJsonBtn">Export JSON</button>
 
 <div id="status"></div>
+
 <h3>Additional Canvas & Fingerprint Settings</h3>
 <label>Canvas Noise: <input id="canvasNoise" type="checkbox"></label><br/>
 <label>Canvas Fingerprint: <input id="canvasFingerprint" type="text" placeholder="canvas fingerprint"></label><br/>
 <label>WebGL Fingerprint: <input id="webglFingerprint" type="text" placeholder="webgl fingerprint"></label><br/>
 <label>Touch Support: <input id="touchSupport" type="checkbox"></label><br/>
 <label>Canvas Pattern: <input id="canvasPattern" type="text" placeholder="Canvas pattern"></label><br/>
-<!-- Input fields for your fingerprint settings -->
-<div style="margin-top:20px;">
-  <label>User Agent: <input id="userAgent" type="text" placeholder="User Agent" size="50"></label><br/>
-  <label>Languages: <input id="languages" type="text" placeholder="en-US,en" size="50"></label><br/>
-  <label>Hardware Concurrency: <input id="hardwareConcurrency" type="text" placeholder="4"></label><br/>
-  <label>Device Memory (GB): <input id="deviceMemory" type="text" placeholder="8"></label><br/>
-  <label>Pixel Ratio: <input id="pixelRatio" type="text" placeholder="1.0"></label><br/>
-  <label>Screen Width: <input id="screenWidth" type="text" placeholder="1920"></label><br/>
-  <label>Screen Height: <input id="screenHeight" type="text" placeholder="1080"></label><br/>
-  <label>Color Depth: <input id="colorDepth" type="text" placeholder="24"></label><br/>
-  <label>Plugins: <input id="plugins" type="text" placeholder="Plugin1, Plugin2"></label><br/>
-  <label>MIME Types: <input id="mimeTypes" type="text" placeholder="mime/type1, mime/type2"></label><br/>
-  <label>Canvas Noise: <input id="canvasNoise" type="checkbox"></label><br/>
-  <label>WebGL Vendor: <input id="webglVendor" type="text" placeholder="Vendor"></label><br/>
-  <label>WebGL Renderer: <input id="webglRenderer" type="text" placeholder="Renderer"></label><br/>
-  <label>Audio Input: <input id="audioInput" type="text" placeholder="Audio Device"></label><br/>
-  <label>Video Input: <input id="videoInput" type="text" placeholder="Video Device"></label><br/>
-  <label>Cookies: <input id="cookies" type="text" placeholder="Cookies"></label><br/>
-</div>
+
+<h3>Basic Fingerprint Settings</h3>
+<label>User Agent: <input id="userAgent" type="text" placeholder="User Agent"></label>
+<label>Languages: <input id="languages" type="text" placeholder="en-US,en"></label>
+<label>Hardware Concurrency: <input id="hardwareConcurrency" type="text" placeholder="4"></label>
+<label>Device Memory (GB): <input id="deviceMemory" type="text" placeholder="8"></label>
+<label>Pixel Ratio: <input id="pixelRatio" type="text" placeholder="1.0"></label>
+<label>Screen Width: <input id="screenWidth" type="text" placeholder="1920"></label>
+<label>Screen Height: <input id="screenHeight" type="text" placeholder="1080"></label>
+<label>Color Depth: <input id="colorDepth" type="text" placeholder="24"></label>
+<label>Plugins: <input id="plugins" type="text" placeholder="Plugin1, Plugin2"></label>
+<label>MIME Types: <input id="mimeTypes" type="text" placeholder="mime/type1, mime/type2"></label>
+<label>WebGL Vendor: <input id="webglVendor" type="text" placeholder="Vendor"></label>
+<label>WebGL Renderer: <input id="webglRenderer" type="text" placeholder="Renderer"></label>
+<label>Audio Input: <input id="audioInput" type="text" placeholder="Audio Device"></label>
+<label>Video Input: <input id="videoInput" type="text" placeholder="Video Device"></label>
+<label>Cookies: <input id="cookies" type="text" placeholder="Cookies"></label>
 </body>
 </html>
