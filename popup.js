@@ -1,34 +1,17 @@
-//popup.js
-// Load recent config from "select folder button"
+// popup.js
+
+// Load recent configuration from localStorage
 function loadRecent() {
   const recent = localStorage.getItem('recentConfig');
   return recent ? JSON.parse(recent) : null;
 }
 
-// Save recent config to localStorage
+// Save recent configuration to localStorage
 function saveRecent(config) {
   localStorage.setItem('recentConfig', JSON.stringify(config));
 }
 
-// Load cookies-based config
-function loadCookies() {
-  const match = document.cookie.match(/fingerprintConfig=([^;]+)/);
-  if (match) {
-    const cookieStr = decodeURIComponent(match[1]);
-    const pairs = cookieStr.split('; ');
-    const config = {};
-    pairs.forEach(pair => {
-      const [k, v] = pair.split('=');
-      if (k && v !== undefined) {
-        config[k] = v;
-      }
-    });
-    return config;
-  }
-  return null;
-}
-
-// Get current settings from inputs
+// Get current settings from input fields
 function getCurrentConfig() {
   return {
     userAgent: document.getElementById('userAgent').value,
@@ -42,15 +25,22 @@ function getCurrentConfig() {
     plugins: document.getElementById('plugins').value,
     mimeTypes: document.getElementById('mimeTypes').value,
     canvasNoise: document.getElementById('canvasNoise').checked,
+    canvasPattern: document.getElementById('canvasPattern').value,
     webglVendor: document.getElementById('webglVendor').value,
     webglRenderer: document.getElementById('webglRenderer').value,
     audioInput: document.getElementById('audioInput').value,
     videoInput: document.getElementById('videoInput').value,
-    cookies: document.getElementById('cookies').value
+    cookies: document.getElementById('cookies').value,
+    // New canvas and fingerprint options
+    canvasFingerprint: document.getElementById('canvasFingerprint').value,
+    webglFingerprint: document.getElementById('webglFingerprint').value,
+    touchSupport: document.getElementById('touchSupport').checked,
+    deviceMemory: document.getElementById('deviceMemory').value,
+    // Add more as needed
   };
 }
 
-// Load config into inputs
+// Load configuration into input fields
 function loadConfig(config) {
   if (!config) return;
   document.getElementById('userAgent').value = config.userAgent || '';
@@ -64,18 +54,22 @@ function loadConfig(config) {
   document.getElementById('plugins').value = config.plugins || '';
   document.getElementById('mimeTypes').value = config.mimeTypes || '';
   document.getElementById('canvasNoise').checked = config.canvasNoise || false;
+  document.getElementById('canvasPattern').value = config.canvasPattern || '';
   document.getElementById('webglVendor').value = config.webglVendor || '';
   document.getElementById('webglRenderer').value = config.webglRenderer || '';
   document.getElementById('audioInput').value = config.audioInput || '';
   document.getElementById('videoInput').value = config.videoInput || '';
   document.getElementById('cookies').value = config.cookies || '';
+  // New
+  document.getElementById('canvasFingerprint').value = config.canvasFingerprint || '';
+  document.getElementById('webglFingerprint').value = config.webglFingerprint || '';
+  document.getElementById('touchSupport').checked = config.touchSupport || false;
 }
 
-// Save settings to localStorage and cookies
+// Save current settings to localStorage and cookies
 function saveSettings() {
   const config = getCurrentConfig();
   localStorage.setItem('savedConfig', JSON.stringify(config));
-  // Save to cookies
   const cookieStr = Object.entries(config).map(([k, v]) => `${k}=${v}`).join('; ');
   document.cookie = `fingerprintConfig=${encodeURIComponent(cookieStr)}; path=/; max-age=31536000`;
   showStatus('Settings saved.');
@@ -88,12 +82,21 @@ function clearSettings() {
   showStatus('Settings cleared.');
 }
 
-// Apply preset
+// Apply current configuration and send to content script
+function applyCurrentSettings() {
+  const config = getCurrentConfig();
+  saveRecent(config);
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs.length > 0) {
+      chrome.scripting.sendMessage({ action: 'applySettings', settings: config });
+      showStatus('Settings applied.');
+    }
+  });
+}
+
+// Load preset or recent configuration
 function applyPreset(presetName) {
-  if (presets[presetName]) {
-    loadConfig(presets[presetName]);
-    showStatus(`Preset "${presetName}" loaded.`);
-  } else if (presetName === 'recent') {
+  if (presetName === 'recent') {
     const recent = loadRecent();
     if (recent) {
       loadConfig(recent);
@@ -101,17 +104,22 @@ function applyPreset(presetName) {
     } else {
       showStatus('No recent configuration found.');
     }
-  } else if (presetName === 'custom') {
-    showStatus('Customize your settings.');
+  } else if (presetName.startsWith('preset')) {
+    // Define preset configurations here if needed
+    showStatus(`Preset "${presetName}" selected (not implemented).`);
+  } else {
+    showStatus(`Preset "${presetName}" not found.`);
   }
 }
 
 // Show status message
 function showStatus(msg) {
-  document.getElementById('status').innerText = msg;
+  const statusDiv = document.getElementById('status');
+  statusDiv.innerText = msg;
+  setTimeout(() => { statusDiv.innerText = ''; }, 3000);
 }
 
-// Import settings
+// Import settings from textarea input
 function importSettings() {
   const textarea = document.getElementById('importTextarea').value.trim();
   const format = document.getElementById('importFormat').value;
@@ -141,21 +149,21 @@ function importSettings() {
   }
 }
 
-// Export in Netscape format
+// Export current config in Netscape format
 function exportNetscape() {
   const config = getCurrentConfig();
   const str = Object.entries(config).map(([k, v]) => `${k}=${v}`).join('; ');
   prompt('Netscape format:', str);
 }
 
-// Export in JSON format
+// Export JSON
 function exportJson() {
   const config = getCurrentConfig();
   const jsonStr = JSON.stringify(config, null, 2);
   prompt('JSON format:', jsonStr);
 }
 
-// Event listeners
+// Event bindings
 document.getElementById('setBtn').addEventListener('click', () => {
   saveSettings();
 });
@@ -163,14 +171,7 @@ document.getElementById('clearBtn').addEventListener('click', () => {
   clearSettings();
 });
 document.getElementById('applyBtn').addEventListener('click', () => {
-  saveRecent(getCurrentConfig());
-  // Send message to content script
-  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    chrome.scripting.sendMessage({
-      action: 'applySettings',
-      settings: getCurrentConfig()
-    });
-  });
+  applyCurrentSettings();
 });
 document.getElementById('presetSelect').addEventListener('change', (e) => {
   applyPreset(e.target.value);
@@ -185,7 +186,7 @@ document.getElementById('exportJsonBtn').addEventListener('click', () => {
   exportJson();
 });
 
-// Initialize form
+// Initialize form with saved or recent settings
 function init() {
   const saved = localStorage.getItem('savedConfig');
   if (saved) {
@@ -201,5 +202,4 @@ function init() {
     loadConfig(recent);
   }
 }
-
 init();
