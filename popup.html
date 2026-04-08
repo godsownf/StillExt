@@ -6,29 +6,47 @@
 <title>Fingerprint Spoofer</title>
 <style>
   body {
-    font-family: Arial, sans-serif;
-    width: 350px;
-    padding: 10px;
-    background-color: #f0f0f0;
-  }
-  h1 {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-  button, select {
-    width: 100%;
-    margin: 5px 0;
-    padding: 8px;
-  }
-  #status {
-    margin-top: 10px;
-    font-size: 14px;
-    height: 20px;
-  }
-  textarea {
-    width: 100%;
-    height: 80px;
-  }
+  font-family: Arial, sans-serif;
+  padding: 10px;
+  width: 370px;
+  background-color: #f0f0f0;
+}
+
+h3 {
+  margin-top: 0;
+  text-align: center;
+}
+
+.section {
+  margin-top: 15px;
+}
+
+label {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+input[type="text"], select, textarea {
+  width: 100%;
+  padding: 5px;
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+button {
+  margin-top: 10px;
+  padding: 6px 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#status {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 14px;
+  height: 20px;
+}
 </style>
 </head>
 <body>
@@ -53,200 +71,12 @@
 <button id="exportJsonBtn">Export JSON</button>
 
 <div id="status"></div>
-
-<script>
-const statusDiv = document.getElementById('status');
-
-function loadRecent() {
-  const recent = localStorage.getItem('recentConfig');
-  return recent ? JSON.parse(recent) : null;
-}
-
-function saveRecent(config) {
-  localStorage.setItem('recentConfig', JSON.stringify(config));
-}
-
-function loadCookies() {
-  const match = document.cookie.match(/fingerprintConfig=([^;]+)/);
-  if (match) {
-    const cookieStr = decodeURIComponent(match[1]);
-    const pairs = cookieStr.split('; ');
-    const config = {};
-    pairs.forEach(pair => {
-      const [k, v] = pair.split('=');
-      if (k && v !== undefined) {
-        config[k] = v;
-      }
-    });
-    return config;
-  }
-  return null;
-}
-
-function getCurrentConfig() {
-  return {
-    userAgent: document.getElementById('userAgent').value,
-    languages: document.getElementById('languages').value,
-    hardwareConcurrency: document.getElementById('hardwareConcurrency').value,
-    deviceMemory: document.getElementById('deviceMemory').value,
-    pixelRatio: document.getElementById('pixelRatio').value,
-    screenWidth: document.getElementById('screenWidth').value,
-    screenHeight: document.getElementById('screenHeight').value,
-    colorDepth: document.getElementById('colorDepth').value,
-    plugins: document.getElementById('plugins').value,
-    mimeTypes: document.getElementById('mimeTypes').value,
-    canvasNoise: document.getElementById('canvasNoise').checked,
-    webglVendor: document.getElementById('webglVendor').value,
-    webglRenderer: document.getElementById('webglRenderer').value,
-    audioInput: document.getElementById('audioInput').value,
-    videoInput: document.getElementById('videoInput').value,
-    cookies: document.getElementById('cookies').value
-  };
-}
-
-function loadConfig(config) {
-  if (!config) return;
-  document.getElementById('userAgent').value = config.userAgent || '';
-  document.getElementById('languages').value = config.languages || '';
-  document.getElementById('hardwareConcurrency').value = config.hardwareConcurrency || '';
-  document.getElementById('deviceMemory').value = config.deviceMemory || '';
-  document.getElementById('pixelRatio').value = config.pixelRatio || '';
-  document.getElementById('screenWidth').value = config.screenWidth || '';
-  document.getElementById('screenHeight').value = config.screenHeight || '';
-  document.getElementById('colorDepth').value = config.colorDepth || '';
-  document.getElementById('plugins').value = config.plugins || '';
-  document.getElementById('mimeTypes').value = config.mimeTypes || '';
-  document.getElementById('canvasNoise').checked = config.canvasNoise || false;
-  document.getElementById('webglVendor').value = config.webglVendor || '';
-  document.getElementById('webglRenderer').value = config.webglRenderer || '';
-  document.getElementById('audioInput').value = config.audioInput || '';
-  document.getElementById('videoInput').value = config.videoInput || '';
-  document.getElementById('cookies').value = config.cookies || '';
-}
-
-function saveSettings() {
-  const config = getCurrentConfig();
-  localStorage.setItem('savedConfig', JSON.stringify(config));
-  const cookieStr = Object.entries(config).map(([k, v]) => `${k}=${v}`).join('; ');
-  document.cookie = `fingerprintConfig=${encodeURIComponent(cookieStr)}; path=/; max-age=31536000`;
-  showStatus('Settings saved.');
-}
-
-function clearSettings() {
-  localStorage.removeItem('savedConfig');
-  document.cookie = "fingerprintConfig=; Max-Age=0; path=/";
-  showStatus('Settings cleared.');
-}
-
-function applyPreset(presetName) {
-  if (presetName === 'recent') {
-    const recent = loadRecent();
-    if (recent) {
-      loadConfig(recent);
-      showStatus('Recent configuration loaded.');
-    } else {
-      showStatus('No recent configuration found.');
-    }
-  } else if (presetName.startsWith('preset')) {
-    // For demo: preset1, preset2, etc.
-    // You can define actual preset configurations here
-    showStatus(`Preset "${presetName}" selected (not implemented).`);
-  } else {
-    showStatus(`Preset "${presetName}" not found.`);
-  }
-}
-
-function showStatus(msg) {
-  document.getElementById('status').innerText = msg;
-  setTimeout(() => { document.getElementById('status').innerText = ''; }, 3000);
-}
-
-function importSettings() {
-  const textarea = document.getElementById('importTextarea').value.trim();
-  const format = document.getElementById('importFormat').value;
-  let config = null;
-
-  if (format === 'json') {
-    try {
-      config = JSON.parse(textarea);
-    } catch (e) {
-      alert('Invalid JSON format.');
-      return;
-    }
-  } else if (format === 'netscape') {
-    config = {};
-    const pairs = textarea.split(';');
-    pairs.forEach(pair => {
-      const [k, v] = pair.trim().split('=');
-      if (k && v !== undefined) {
-        config[k.trim()] = v.trim();
-      }
-    });
-  }
-
-  if (config) {
-    loadConfig(config);
-    showStatus('Settings imported.');
-  }
-}
-
-function exportNetscape() {
-  const config = getCurrentConfig();
-  const str = Object.entries(config).map(([k, v]) => `${k}=${v}`).join('; ');
-  prompt('Netscape format:', str);
-}
-
-function exportJson() {
-  const config = getCurrentConfig();
-  const jsonStr = JSON.stringify(config, null, 2);
-  prompt('JSON format:', jsonStr);
-}
-
-// Event bindings
-document.getElementById('setBtn').addEventListener('click', () => {
-  saveSettings();
-});
-document.getElementById('clearBtn').addEventListener('click', () => {
-  clearSettings();
-});
-document.getElementById('applyBtn').addEventListener('click', () => {
-  saveRecent(getCurrentConfig());
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    chrome.scripting.sendMessage({ action: 'applySettings', settings: getCurrentConfig() });
-  });
-});
-document.getElementById('presetSelect').addEventListener('change', (e) => {
-  applyPreset(e.target.value);
-});
-document.getElementById('importBtn').addEventListener('click', () => {
-  importSettings();
-});
-document.getElementById('exportNetscapeBtn').addEventListener('click', () => {
-  exportNetscape();
-});
-document.getElementById('exportJsonBtn').addEventListener('click', () => {
-  exportJson();
-});
-
-// Initialize form
-function init() {
-  const saved = localStorage.getItem('savedConfig');
-  if (saved) {
-    loadConfig(JSON.parse(saved));
-  } else {
-    const cookiesConfig = loadCookies();
-    if (cookiesConfig) {
-      loadConfig(cookiesConfig);
-    }
-  }
-  const recent = loadRecent();
-  if (recent) {
-    loadConfig(recent);
-  }
-}
-init();
-</script>
-
+<h3>Additional Canvas & Fingerprint Settings</h3>
+<label>Canvas Noise: <input id="canvasNoise" type="checkbox"></label><br/>
+<label>Canvas Fingerprint: <input id="canvasFingerprint" type="text" placeholder="canvas fingerprint"></label><br/>
+<label>WebGL Fingerprint: <input id="webglFingerprint" type="text" placeholder="webgl fingerprint"></label><br/>
+<label>Touch Support: <input id="touchSupport" type="checkbox"></label><br/>
+<label>Canvas Pattern: <input id="canvasPattern" type="text" placeholder="Canvas pattern"></label><br/>
 <!-- Input fields for your fingerprint settings -->
 <div style="margin-top:20px;">
   <label>User Agent: <input id="userAgent" type="text" placeholder="User Agent" size="50"></label><br/>
