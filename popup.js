@@ -1,5 +1,3 @@
-// popup.js
-
 // Load recent configuration from localStorage
 function loadRecent() {
   const recent = localStorage.getItem('recentConfig');
@@ -31,12 +29,10 @@ function getCurrentConfig() {
     audioInput: document.getElementById('audioInput').value,
     videoInput: document.getElementById('videoInput').value,
     cookies: document.getElementById('cookies').value,
-    // New canvas and fingerprint options
+    // Additional
     canvasFingerprint: document.getElementById('canvasFingerprint').value,
     webglFingerprint: document.getElementById('webglFingerprint').value,
     touchSupport: document.getElementById('touchSupport').checked,
-    deviceMemory: document.getElementById('deviceMemory').value,
-    // Add more as needed
   };
 }
 
@@ -60,7 +56,7 @@ function loadConfig(config) {
   document.getElementById('audioInput').value = config.audioInput || '';
   document.getElementById('videoInput').value = config.videoInput || '';
   document.getElementById('cookies').value = config.cookies || '';
-  // New
+  // Additional
   document.getElementById('canvasFingerprint').value = config.canvasFingerprint || '';
   document.getElementById('webglFingerprint').value = config.webglFingerprint || '';
   document.getElementById('touchSupport').checked = config.touchSupport || false;
@@ -88,7 +84,13 @@ function applyCurrentSettings() {
   saveRecent(config);
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (tabs.length > 0) {
-      chrome.scripting.sendMessage({ action: 'applySettings', settings: config });
+      chrome.scripting.executeScript({
+        target: { tabId: tabs[0].id },
+        func: (settings) => {
+          chrome.runtime.sendMessage({ action: 'applySettings', settings });
+        },
+        args: [config],
+      });
       showStatus('Settings applied.');
     }
   });
