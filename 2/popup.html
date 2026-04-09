@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="styles.css" />
+  <title>StillExt — Fingerprint Dashboard</title>
+</head>
+
+<body>
+  <div class="app-container">
+    <!-- HEADER -->
+    <header class="main-header">
+      <div class="brand">
+        <span class="logo">🛡️</span>
+        <h1>Fingerprint Spoofer</h1>
+      </div>
+      <div class="preset-controls">
+        <select id="presetSelect" class="preset-dropdown">
+          <option value="">— Choose Preset —</option>
+          <option value="chrome_win">Chrome Windows</option>
+          <option value="chrome_mac">Chrome macOS</option>
+          <option value="firefox_win">Firefox Windows</option>
+          <option value="safari_mac">Safari Mac</option>
+          <option value="mobile_chrome">Android Phone</option>
+          <option value="mobile_safari">iPhone / iOS</option>
+        </select>
+        <button class="btn-icon" id="randomBtn" title="Randomize">🎲</button>
+      </div>
+    </header>
+
+    <!-- TAB NAVIGATION -->
+    <nav class="tabs">
+      <button class="tab-link active" data-tab="fp">🔍 Fingerprint</button>
+      <button class="tab-link" data-tab="ck">🍪 Cookies</button>
+      <button class="tab-link" data-tab="io">⚙️ Settings</button>
+    </nav>
+
+    <!-- MAIN SCROLLABLE CONTENT -->
+    <main class="scroll-content">
+
+      <!-- FINGERPRINT TAB -->
+      <div class="tab-panel active" id="tab-fp">
+        <section class="config-card">
+          <h2 class="sec-title">Navigator & Identity</h2>
+          <div class="input-group">
+            <label>User Agent String</label>
+            <input id="userAgent" type="text" placeholder="Mozilla/5.0...">
+          </div>
+          <div class="grid grid-2">
+            <div class="input-group"><label>Platform</label><input id="platform" type="text" placeholder="Win32"></div>
+            <div class="input-group"><label>Vendor</label><input id="vendor" type="text" placeholder="Google Inc.">
+            </div>
+          </div>
+          <div class="grid grid-3">
+            <div class="input-group"><label>App Name</label><input id="appName" type="text"></div>
+            <div class="input-group"><label>Product</label><input id="product" type="text"></div>
+            <div class="input-group"><label>Prod. Sub</label><input id="productSub" type="text"></div>
+          </div>
+          <div class="input-group">
+            <label>Languages (comma separated)</label>
+            <input id="languages" type="text" placeholder="en-US, en">
+          </div>
+          <div class="grid grid-3">
+            <div class="input-group"><label>CPU Cores</label><input id="hardwareConcurrency" type="text"></div>
+            <div class="input-group"><label>RAM (GB)</label><input id="deviceMemory" type="text"></div>
+            <div class="input-group"><label>Touch Pts</label><input id="maxTouchPoints" type="text"></div>
+          </div>
+          <div class="checkbox-list">
+            <label class="toggle"><input type="checkbox" id="doNotTrack"><span></span> Do Not Track (DNT: 1)</label>
+            <label class="toggle"><input type="checkbox" id="cookieEnabled" checked><span></span> Cookies
+              Enabled</label>
+            <label class="toggle"><input type="checkbox" id="hideWebdriver"><span></span> Hide WebDriver</label>
+            <label class="toggle"><input type="checkbox" id="touchSupport"><span></span> Touch Events</label>
+          </div>
+        </section>
+
+        <section class="config-card">
+          <h2 class="sec-title">Screen & Viewport</h2>
+          <div class="grid grid-3">
+            <div class="input-group"><label>Width</label><input id="screenWidth" type="text"></div>
+            <div class="input-group"><label>Height</label><input id="screenHeight" type="text"></div>
+            <div class="input-group"><label>Ratio</label><input id="pixelRatio" type="text"></div>
+          </div>
+          <div class="grid grid-2">
+            <div class="input-group"><label>Color Depth</label><input id="colorDepth" type="text"></div>
+            <div class="input-group"><label>Pixel Depth</label><input id="pixelDepth" type="text"></div>
+          </div>
+        </section>
+
+        <section class="config-card">
+          <h2 class="sec-title">Graphics (WebGL & Canvas)</h2>
+          <div class="input-group"><label>WebGL Vendor</label><input id="webglVendor" type="text"></div>
+          <div class="input-group"><label>WebGL Renderer</label><input id="webglRenderer" type="text"></div>
+          <div class="divider"></div>
+          <div class="checkbox-list">
+            <label class="toggle"><input type="checkbox" id="canvasNoise"><span></span> Inject Canvas Noise</label>
+          </div>
+          <div class="grid grid-2" style="margin-top:10px">
+            <div class="input-group"><label>Noise Intensity</label><input id="canvasNoiseLevel" type="text"
+                placeholder="0.1"></div>
+            <div class="input-group"><label>Pattern Seed</label><input id="canvasFingerprint" type="text"></div>
+          </div>
+        </section>
+
+        <section class="config-card">
+          <h2 class="sec-title">Battery & Location</h2>
+          <div class="checkbox-list">
+            <label class="toggle"><input type="checkbox" id="spoofBattery"><span></span> Spoof Battery</label>
+          </div>
+          <div class="grid grid-2" style="margin-top:10px">
+            <div class="input-group"><label>Level (0-1)</label><input id="batteryLevel" type="text"></div>
+            <div class="input-group"><label>Discharge (s)</label><input id="dischargingTime" type="text"></div>
+          </div>
+          <div class="divider"></div>
+          <div class="checkbox-list">
+            <label class="toggle"><input type="checkbox" id="spoofGeo"><span></span> Spoof Geolocation</label>
+          </div>
+          <div class="grid grid-2" style="margin-top:10px">
+            <div class="input-group"><label>Latitude</label><input id="geoLat" type="text"></div>
+            <div class="input-group"><label>Longitude</label><input id="geoLon" type="text"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- COOKIES TAB -->
+      <div class="tab-panel" id="tab-ck">
+        <section class="config-card">
+          <h2 class="sec-title">Paste Cookie Data</h2>
+          <select id="cookieFormat" class="full-select">
+            <option value="auto">Auto-Detect Format</option>
+            <option value="json_array">JSON Array</option>
+            <option value="netscape">Netscape (TSV)</option>
+          </select>
+          <textarea id="cookiePaste" rows="5" placeholder="Paste cookies here..."></textarea>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="injectCookiesBtn">Inject to Tab</button>
+            <button class="btn btn-bad" id="clearTabCookiesBtn">Clear Tab Cookies</button>
+          </div>
+        </section>
+      </div>
+
+      <!-- SETTINGS/IO TAB -->
+      <div class="tab-panel" id="tab-io">
+        <section class="config-card">
+          <h2 class="sec-title">Export / Import Settings</h2>
+          <textarea id="importTextarea" rows="4" placeholder="JSON or Netscape config string..."></textarea>
+          <div class="btn-row">
+            <button class="btn btn-primary" id="importBtn">Import Configuration</button>
+          </div>
+          <div class="divider"></div>
+          <div class="btn-row">
+            <button class="btn btn-outline" id="exportJsonBtn">Export JSON</button>
+            <button class="btn btn-outline" id="exportNetscapeBtn">Export Netscape</button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- FIXED FOOTER ACTIONS -->
+    <footer class="main-footer">
+      <div id="status">Ready</div>
+      <div class="action-bar">
+        <button class="btn btn-bad" id="clearBtn">Clear</button>
+        <button class="btn btn-secondary" id="setBtn">Save</button>
+        <button class="btn btn-primary" id="applyBtn">Apply Changes</button>
+      </div>
+    </footer>
+  </div>
+  <script src="popup.js"></script>
+</body>
+
+</html>
