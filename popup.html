@@ -1,494 +1,315 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Fingerprint Spoofer — Web Preview</title>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: #0f1117;
-    color: #e2e8f0;
-    font-size: 13px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    gap: 16px;
-  }
-  .preview-note {
-    background: #1a1d27;
-    border: 1px solid #2e3250;
-    border-radius: 8px;
-    padding: 10px 16px;
-    font-size: 12px;
-    color: #94a3b8;
-    max-width: 420px;
-    width: 100%;
-    text-align: center;
-  }
-  .preview-note b { color: #5b7fff; }
-  .popup-frame {
-    width: 400px;
-    border: 1px solid #2e3250;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
-  }
-  /* ---- Everything below mirrors popup.html CSS ---- */
-  header {
-    background: linear-gradient(135deg,#1a1d27,#222538);
-    border-bottom: 1px solid #2e3250;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  header h1 { font-size: 14px; font-weight: 700; }
-  header .preset-wrap { display: flex; gap: 5px; align-items: center; }
-  header select {
-    background: #222538; border: 1px solid #2e3250; border-radius: 4px;
-    color: #e2e8f0; padding: 3px 6px; font-size: 11px; cursor: pointer;
-  }
-  .tabs {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    background: #1a1d27;
-    border-bottom: 1px solid #2e3250;
-  }
-  .tab-btn {
-    padding: 9px 4px;
-    background: none;
-    border: none;
-    color: #94a3b8;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: color 0.15s;
-  }
-  .tab-btn.active { color: #5b7fff; border-bottom-color: #5b7fff; }
-  .tab-panel { display: none; padding: 10px; max-height: 470px; overflow-y: auto; }
-  .tab-panel.active { display: block; }
-  .sec {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.8px; color: #94a3b8;
-    margin: 12px 0 7px; padding-bottom: 4px;
-    border-bottom: 1px solid #2e3250;
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .sec:first-child { margin-top: 0; }
-  label.f { display: block; margin-bottom: 6px; }
-  label.f b { display: block; font-size: 11px; color: #94a3b8; font-weight: 500; margin-bottom: 3px; }
-  input[type="text"], input[type="password"], select, textarea {
-    width: 100%; background: #1a1d27; border: 1px solid #2e3250;
-    border-radius: 5px; color: #e2e8f0; padding: 5px 8px;
-    font-size: 12px; outline: none;
-  }
-  input:focus, select:focus, textarea:focus { border-color: #5b7fff; }
-  input[type="checkbox"] { width: auto; margin-right: 5px; accent-color: #5b7fff; cursor: pointer; }
-  .chk { display: flex; align-items: center; padding: 5px 0; font-size: 12px; cursor: pointer; border-bottom: 1px solid #1a1d27; }
-  .chk:last-child { border-bottom: none; }
-  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
-  .g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
-  .g4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
-  .btn-row { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
-  button.btn {
-    flex: 1; background: #222538; border: 1px solid #2e3250;
-    border-radius: 5px; color: #e2e8f0; padding: 6px 8px;
-    font-size: 11px; font-weight: 600; cursor: pointer; transition: border-color 0.15s;
-  }
-  button.btn:hover { border-color: #5b7fff; color: #5b7fff; }
-  button.btn.primary { background: #5b7fff; border-color: #5b7fff; color: #fff; }
-  button.btn.primary:hover { background: #4a6ef0; }
-  button.btn.ok  { border-color: #22c55e; color: #22c55e; }
-  button.btn.bad { border-color: #ef4444; color: #ef4444; }
-  button.btn.sm  { padding: 4px 8px; font-size: 10px; flex: none; }
-  .bar {
-    display: flex; gap: 6px; padding: 8px 10px;
-    background: #1a1d27; border-top: 1px solid #2e3250;
-  }
-  #status {
-    text-align: center; padding: 3px 10px; font-size: 11px;
-    font-weight: 600; color: #5b7fff; min-height: 20px; background: #1a1d27;
-  }
-  .tbl-wrap { max-height: 150px; overflow: auto; border: 1px solid #2e3250; border-radius: 5px; margin-top: 5px; }
-  table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  th { background: #222538; color: #94a3b8; font-weight: 700; padding: 4px 6px; text-align: left; position: sticky; top: 0; cursor: pointer; white-space: nowrap; }
-  th:hover { color: #5b7fff; }
-  td { padding: 3px 6px; border-bottom: 1px solid #1a1d27; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  tr:hover td { background: #222538; }
-  .pill { display: inline-block; padding: 1px 4px; border-radius: 3px; font-size: 9px; font-weight: 700; }
-  .pill-g { background: rgba(34,197,94,.15); color: #22c55e; }
-  .pill-r { background: rgba(239,68,68,.15); color: #ef4444; }
-  .hist { display: flex; align-items: center; gap: 5px; padding: 5px 0; border-bottom: 1px solid #2e3250; font-size: 12px; }
-  .hist:last-child { border-bottom: none; }
-  .hist-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #e2e8f0; }
-  .hist-count { color: #94a3b8; font-size: 10px; margin-right: 4px; }
-</style>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="styles.css" />
+  <title>StillExt — Web Preview</title>
 </head>
+
 <body>
 
-<div class="preview-note">
-  <b>Web Preview</b> — Install as a Chrome extension for full functionality.<br>
-  UI controls and local storage work normally here.
-</div>
-
-<div class="popup-frame">
-
-<header>
-  <h1>&#128737; Fingerprint Spoofer</h1>
-  <div class="preset-wrap">
-    <select id="presetSelect">
-      <option value="">— Preset —</option>
-      <option value="chrome_win">Chrome Win</option>
-      <option value="chrome_mac">Chrome Mac</option>
-      <option value="firefox_win">Firefox Win</option>
-      <option value="safari_mac">Safari Mac</option>
-      <option value="edge_win">Edge Win</option>
-      <option value="mobile_chrome">Mobile Android</option>
-      <option value="mobile_safari">Mobile iOS</option>
-    </select>
-    <button class="btn sm primary" id="randomBtn">&#127922; Rnd</button>
-  </div>
-</header>
-
-<div class="tabs">
-  <button class="tab-btn active" data-tab="fp">&#128270; Fingerprint</button>
-  <button class="tab-btn" data-tab="ck">&#127850; Cookies</button>
-  <button class="tab-btn" data-tab="io">&#9881; Settings</button>
-</div>
-
-<!-- FINGERPRINT TAB -->
-<div class="tab-panel active" id="tab-fp">
-  <div class="sec">Navigator</div>
-  <label class="f"><b>User Agent</b><input id="userAgent" type="text" placeholder="Mozilla/5.0 ..."></label>
-  <div class="g2">
-    <label class="f"><b>Platform</b><input id="platform" type="text" placeholder="Win32"></label>
-    <label class="f"><b>Vendor</b><input id="vendor" type="text" placeholder="Google Inc."></label>
-  </div>
-  <div class="g3">
-    <label class="f"><b>App Name</b><input id="appName" type="text" placeholder="Netscape"></label>
-    <label class="f"><b>Product</b><input id="product" type="text" placeholder="Gecko"></label>
-    <label class="f"><b>Product Sub</b><input id="productSub" type="text" placeholder="20030107"></label>
-  </div>
-  <label class="f"><b>App Version</b><input id="appVersion" type="text" placeholder="5.0 (Windows NT 10.0; Win64; x64) ..."></label>
-  <label class="f"><b>Languages</b><input id="languages" type="text" placeholder="en-US,en"></label>
-  <div class="g3">
-    <label class="f"><b>CPU Cores</b><input id="hardwareConcurrency" type="text" placeholder="8"></label>
-    <label class="f"><b>Memory GB</b><input id="deviceMemory" type="text" placeholder="8"></label>
-    <label class="f"><b>Touch Points</b><input id="maxTouchPoints" type="text" placeholder="0"></label>
-  </div>
-  <label class="chk"><input type="checkbox" id="doNotTrack"> Do Not Track (DNT: 1)</label>
-  <label class="chk"><input type="checkbox" id="cookieEnabled" checked> Report Cookies Enabled</label>
-  <label class="chk"><input type="checkbox" id="pdfViewerEnabled" checked> Report PDF Viewer Enabled</label>
-  <label class="chk"><input type="checkbox" id="hideWebdriver"> Hide navigator.webdriver</label>
-  <label class="chk"><input type="checkbox" id="hideAutomation"> Hide Chrome automation props</label>
-  <label class="chk"><input type="checkbox" id="touchSupport"> Enable Touch Events</label>
-
-  <div class="sec">Screen &amp; Window</div>
-  <div class="g3">
-    <label class="f"><b>Width</b><input id="screenWidth" type="text" placeholder="1920"></label>
-    <label class="f"><b>Height</b><input id="screenHeight" type="text" placeholder="1080"></label>
-    <label class="f"><b>Color Depth</b><input id="colorDepth" type="text" placeholder="24"></label>
-  </div>
-  <div class="g4">
-    <label class="f"><b>Pixel Depth</b><input id="pixelDepth" type="text" placeholder="24"></label>
-    <label class="f"><b>Avail W</b><input id="availWidth" type="text" placeholder="1920"></label>
-    <label class="f"><b>Avail H</b><input id="availHeight" type="text" placeholder="1040"></label>
-    <label class="f"><b>Pixel Ratio</b><input id="pixelRatio" type="text" placeholder="1.0"></label>
-  </div>
-  <div class="g4">
-    <label class="f"><b>Outer W</b><input id="outerWidth" type="text" placeholder="1920"></label>
-    <label class="f"><b>Outer H</b><input id="outerHeight" type="text" placeholder="1080"></label>
-    <label class="f"><b>Inner W</b><input id="innerWidth" type="text" placeholder="1920"></label>
-    <label class="f"><b>Inner H</b><input id="innerHeight" type="text" placeholder="937"></label>
-  </div>
-  <div class="g2">
-    <label class="f"><b>Screen X</b><input id="screenX" type="text" placeholder="0"></label>
-    <label class="f"><b>Screen Y</b><input id="screenY" type="text" placeholder="0"></label>
+  <div class="preview-note">
+    <b>Web Preview</b> — Install as a Chrome extension for full functionality.<br>
+    UI controls and local storage work normally here.
   </div>
 
-  <div class="sec">WebGL</div>
-  <div class="g2">
-    <label class="f"><b>Vendor</b><input id="webglVendor" type="text" placeholder="Google Inc. (Intel)"></label>
-    <label class="f"><b>Renderer</b><input id="webglRenderer" type="text" placeholder="ANGLE (...)"></label>
-  </div>
-  <div class="g2">
-    <label class="f"><b>Version String</b><input id="webglVersion" type="text" placeholder="WebGL 1.0 (OpenGL ES 2.0 Chromium)"></label>
-    <label class="f"><b>GLSL Version</b><input id="webglGlsl" type="text" placeholder="WebGL GLSL ES 1.0 ..."></label>
-  </div>
-  <label class="f"><b>WebGL Fingerprint Seed</b><input id="webglFingerprint" type="text" placeholder="seed / hash"></label>
+  <div class="popup-frame">
 
-  <div class="sec">Canvas &amp; Audio</div>
-  <label class="chk"><input type="checkbox" id="canvasNoise"> Inject Canvas Noise</label>
-  <div class="g3" style="margin-top:6px">
-    <label class="f"><b>Canvas Intensity</b><input id="canvasNoiseLevel" type="text" placeholder="0.1"></label>
-    <label class="f"><b>Canvas FP Seed</b><input id="canvasFingerprint" type="text" placeholder="seed"></label>
-    <label class="f"><b>Canvas Pattern</b><input id="canvasPattern" type="text" placeholder="pattern"></label>
-  </div>
-  <label class="chk"><input type="checkbox" id="audioNoise"> Inject Audio Context Noise</label>
-  <div class="g2" style="margin-top:6px">
-    <label class="f"><b>Audio Intensity</b><input id="audioNoiseLevel" type="text" placeholder="0.0001"></label>
-    <label class="f"><b>Audio FP Seed</b><input id="audioSeed" type="text" placeholder="seed"></label>
-  </div>
+    <header>
+      <h1>&#128737; Fingerprint Spoofer</h1>
+      <div class="preset-wrap">
+        <select id="presetSelect">
+          <option value="">— Preset —</option>
+          <option value="chrome_win">Chrome Win</option>
+          <option value="chrome_mac">Chrome Mac</option>
+          <option value="firefox_win">Firefox Win</option>
+          <option value="safari_mac">Safari Mac</option>
+          <option value="edge_win">Edge Win</option>
+          <option value="mobile_chrome">Mobile Android</option>
+          <option value="mobile_safari">Mobile iOS</option>
+        </select>
+        <button class="btn sm primary" id="randomBtn">&#127922; Rnd</button>
+      </div>
+    </header>
 
-  <div class="sec">Timezone &amp; Network</div>
-  <div class="g2">
-    <label class="f"><b>Timezone</b>
-      <select id="timezone">
-        <option value="">Real Timezone</option>
-        <option value="America/New_York">America/New_York</option>
-        <option value="America/Los_Angeles">America/Los_Angeles</option>
-        <option value="America/Chicago">America/Chicago</option>
-        <option value="Europe/London">Europe/London</option>
-        <option value="Europe/Berlin">Europe/Berlin</option>
-        <option value="Europe/Paris">Europe/Paris</option>
-        <option value="Asia/Tokyo">Asia/Tokyo</option>
-        <option value="Asia/Shanghai">Asia/Shanghai</option>
-        <option value="Asia/Dubai">Asia/Dubai</option>
-        <option value="Australia/Sydney">Australia/Sydney</option>
-      </select>
-    </label>
-    <label class="f"><b>Connection Type</b>
-      <select id="connectionType">
-        <option value="">Real Value</option>
-        <option value="4g">4g</option>
-        <option value="3g">3g</option>
-        <option value="2g">2g</option>
-        <option value="wifi">wifi</option>
-        <option value="ethernet">ethernet</option>
-      </select>
-    </label>
-  </div>
-  <div class="g3">
-    <label class="f"><b>Downlink Mbps</b><input id="downlink" type="text" placeholder="10"></label>
-    <label class="f"><b>RTT ms</b><input id="rtt" type="text" placeholder="100"></label>
-    <label class="f"><b>Save Data</b>
-      <select id="saveData"><option value="">Real</option><option value="false">false</option><option value="true">true</option></select>
-    </label>
-  </div>
-
-  <div class="sec">Battery &amp; Geo</div>
-  <label class="chk"><input type="checkbox" id="spoofBattery"> Spoof Battery Status</label>
-  <div class="g4" style="margin-top:6px">
-    <label class="f"><b>Level (0–1)</b><input id="batteryLevel" type="text" placeholder="0.87"></label>
-    <label class="f"><b>Charging</b>
-      <select id="batteryCharging"><option value="true">Yes</option><option value="false">No</option></select>
-    </label>
-    <label class="f"><b>Charge Time</b><input id="chargingTime" type="text" placeholder="Infinity"></label>
-    <label class="f"><b>Discharge (s)</b><input id="dischargingTime" type="text" placeholder="3600"></label>
-  </div>
-  <label class="chk"><input type="checkbox" id="spoofGeo"> Spoof Geolocation</label>
-  <div class="g3" style="margin-top:6px">
-    <label class="f"><b>Latitude</b><input id="geoLat" type="text" placeholder="40.7128"></label>
-    <label class="f"><b>Longitude</b><input id="geoLon" type="text" placeholder="-74.0060"></label>
-    <label class="f"><b>Accuracy m</b><input id="geoAccuracy" type="text" placeholder="10"></label>
-  </div>
-
-  <div class="sec">Plugins, Fonts &amp; Media</div>
-  <label class="f"><b>Plugins (comma-separated)</b><input id="plugins" type="text" placeholder="PDF Viewer, Chrome PDF Viewer"></label>
-  <label class="f"><b>MIME Types (comma-separated)</b><input id="mimeTypes" type="text" placeholder="application/pdf, text/pdf"></label>
-  <div class="g2">
-    <label class="f"><b>Audio Input Label</b><input id="audioInput" type="text" placeholder="Default Microphone"></label>
-    <label class="f"><b>Video Input Label</b><input id="videoInput" type="text" placeholder="Default Camera"></label>
-  </div>
-  <label class="f"><b>Font List Override (comma-separated)</b>
-    <textarea id="fontList" rows="2" placeholder="Arial, Helvetica, Times New Roman, ..."></textarea>
-  </label>
-</div>
-
-<!-- COOKIES TAB -->
-<div class="tab-panel" id="tab-ck">
-  <div class="sec">Paste &amp; Import Cookies</div>
-  <div class="g2">
-    <label class="f"><b>Format</b>
-      <select id="cookieFormat">
-        <option value="auto">Auto-Detect</option>
-        <option value="netscape">Netscape (TSV)</option>
-        <option value="json_array">JSON Array</option>
-        <option value="json_obj">JSON Object</option>
-        <option value="editthiscookie">EditThisCookie</option>
-        <option value="header">HTTP Cookie Header</option>
-        <option value="raw">Raw key=value</option>
-      </select>
-    </label>
-    <label class="f"><b>Filter by Domain</b><input id="cookieDomainFilter" type="text" placeholder=".example.com"></label>
-  </div>
-  <textarea id="cookiePaste" rows="4" placeholder="Paste cookies in any format...&#10;Netscape, JSON, EditThisCookie, raw key=value, HTTP header"></textarea>
-  <div class="btn-row">
-    <button class="btn primary" id="parseCookiesBtn">&#128270; Parse</button>
-    <button class="btn ok" id="injectCookiesBtn">&#9654; Inject to Tab</button>
-    <button class="btn" id="clearCookiePasteBtn">&#128465; Clear</button>
-    <button class="btn bad" id="clearTabCookiesBtn">&#128683; Clear Tab</button>
-  </div>
-
-  <div class="sec">
-    <span>Cookie Table <span id="cookieCount" style="color:#5b7fff;font-weight:400"></span></span>
-    <div style="display:flex;gap:5px;align-items:center">
-      <input id="cookieSearch" type="text" placeholder="Search..." style="width:90px;padding:2px 6px;font-size:11px">
-      <select id="cookieSort" style="font-size:11px;padding:2px 4px">
-        <option value="name">Name</option>
-        <option value="domain">Domain</option>
-        <option value="expires">Expires</option>
-        <option value="value">Value</option>
-      </select>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="fp">&#128270; Fingerprint</button>
+      <button class="tab-btn" data-tab="ck">&#127850; Cookies</button>
+      <button class="tab-btn" data-tab="io">&#9881; Settings</button>
     </div>
-  </div>
-  <div class="tbl-wrap">
-    <table>
-      <thead><tr>
-        <th data-col="name">Name</th>
-        <th data-col="value">Value</th>
-        <th data-col="domain">Domain</th>
-        <th data-col="expires">Expires</th>
-        <th>Flags</th>
-        <th></th>
-      </tr></thead>
-      <tbody id="cookieTableBody">
-        <tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:10px">Paste and parse cookies above</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <div class="btn-row">
-    <button class="btn" id="exportCookiesJsonBtn">&#128228; JSON</button>
-    <button class="btn" id="exportCookiesNetscapeBtn">&#128228; Netscape</button>
-    <button class="btn" id="exportCookiesHeaderBtn">&#128228; Header</button>
-  </div>
 
-  <div class="sec">Cookie History</div>
-  <div class="g2">
-    <input id="cookieHistoryName" type="text" placeholder="Name this cookie set...">
-    <button class="btn ok" id="saveCookieHistoryBtn">&#128190; Save Set</button>
-  </div>
-  <div id="cookieHistoryList" style="margin-top:6px">
-    <div style="color:#94a3b8;font-size:11px;padding:4px 0">No saved sets yet.</div>
-  </div>
+    <!-- FINGERPRINT TAB -->
+    <div class="tab-panel active" id="tab-fp">
+      <div class="sec">Navigator</div>
+      <label class="f"><b>User Agent</b><input id="userAgent" type="text" placeholder="Mozilla/5.0 ..."></label>
+      <div class="g2">
+        <label class="f"><b>Platform</b><input id="platform" type="text" placeholder="Win32"></label>
+        <label class="f"><b>Vendor</b><input id="vendor" type="text" placeholder="Google Inc."></label>
+      </div>
+      <div class="g3">
+        <label class="f"><b>App Name</b><input id="appName" type="text" placeholder="Netscape"></label>
+        <label class="f"><b>Product</b><input id="product" type="text" placeholder="Gecko"></label>
+        <label class="f"><b>Product Sub</b><input id="productSub" type="text" placeholder="20030107"></label>
+      </div>
+      <label class="f"><b>App Version</b><input id="appVersion" type="text"
+          placeholder="5.0 (Windows NT 10.0; Win64; x64) ..."></label>
+      <label class="f"><b>Languages</b><input id="languages" type="text" placeholder="en-US,en"></label>
+      <div class="g3">
+        <label class="f"><b>CPU Cores</b><input id="hardwareConcurrency" type="text" placeholder="8"></label>
+        <label class="f"><b>Memory GB</b><input id="deviceMemory" type="text" placeholder="8"></label>
+        <label class="f"><b>Touch Points</b><input id="maxTouchPoints" type="text" placeholder="0"></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="doNotTrack"> Do Not Track (DNT: 1)</label>
+      <label class="chk"><input type="checkbox" id="cookieEnabled" checked> Report Cookies Enabled</label>
+      <label class="chk"><input type="checkbox" id="pdfViewerEnabled" checked> Report PDF Viewer Enabled</label>
+      <label class="chk"><input type="checkbox" id="hideWebdriver"> Hide navigator.webdriver</label>
+      <label class="chk"><input type="checkbox" id="hideAutomation"> Hide Chrome automation props</label>
+      <label class="chk"><input type="checkbox" id="touchSupport"> Enable Touch Events</label>
 
-  <div class="sec">Autofill Profile</div>
-  <div class="g2">
-    <label class="f"><b>Full Name</b><input id="afName" type="text" placeholder="John Doe"></label>
-    <label class="f"><b>Email</b><input id="afEmail" type="text" placeholder="john@example.com"></label>
-  </div>
-  <div class="g2">
-    <label class="f"><b>Username</b><input id="afUsername" type="text" placeholder="johndoe"></label>
-    <label class="f"><b>Phone</b><input id="afPhone" type="text" placeholder="+1 555 000 0000"></label>
-  </div>
-  <label class="f"><b>Street Address</b><input id="afStreet" type="text" placeholder="123 Main St"></label>
-  <div class="g3">
-    <label class="f"><b>City</b><input id="afCity" type="text" placeholder="New York"></label>
-    <label class="f"><b>State</b><input id="afState" type="text" placeholder="NY"></label>
-    <label class="f"><b>ZIP</b><input id="afZip" type="text" placeholder="10001"></label>
-  </div>
-  <label class="f"><b>Country</b>
-    <select id="afCountry">
-      <option value="">— Country —</option>
-      <option value="US">United States</option>
-      <option value="GB">United Kingdom</option>
-      <option value="CA">Canada</option>
-      <option value="AU">Australia</option>
-      <option value="DE">Germany</option>
-      <option value="FR">France</option>
-      <option value="JP">Japan</option>
-      <option value="SG">Singapore</option>
-    </select>
-  </label>
-  <div class="g2">
-    <label class="f"><b>Card Holder</b><input id="afCardName" type="text" placeholder="John Doe"></label>
-    <label class="f"><b>Card Number</b><input id="afCardNum" type="text" placeholder="4111 1111 1111 1111"></label>
-  </div>
-  <div class="g3">
-    <label class="f"><b>Expiry MM/YY</b><input id="afCardExpiry" type="text" placeholder="12/26"></label>
-    <label class="f"><b>CVV</b><input id="afCardCvv" type="text" placeholder="123"></label>
-    <label class="f"><b>Profile</b>
-      <select id="autofillProfileSelect"><option value="">— Load —</option></select>
-    </label>
-  </div>
-  <div class="btn-row">
-    <button class="btn primary" id="applyAutofillBtn">&#9654; Enable Autofill</button>
-    <button class="btn ok" id="saveAutofillBtn">&#128190; Save Profile</button>
-  </div>
-</div>
+      <div class="sec">Screen &amp; Window</div>
+      <div class="g3">
+        <label class="f"><b>Width</b><input id="screenWidth" type="text" placeholder="1920"></label>
+        <label class="f"><b>Height</b><input id="screenHeight" type="text" placeholder="1080"></label>
+        <label class="f"><b>Color Depth</b><input id="colorDepth" type="text" placeholder="24"></label>
+      </div>
+      <div class="g4">
+        <label class="f"><b>Pixel Depth</b><input id="pixelDepth" type="text" placeholder="24"></label>
+        <label class="f"><b>Avail W</b><input id="availWidth" type="text" placeholder="1920"></label>
+        <label class="f"><b>Avail H</b><input id="availHeight" type="text" placeholder="1040"></label>
+        <label class="f"><b>Pixel Ratio</b><input id="pixelRatio" type="text" placeholder="1.0"></label>
+      </div>
+      <div class="g4">
+        <label class="f"><b>Outer W</b><input id="outerWidth" type="text" placeholder="1920"></label>
+        <label class="f"><b>Outer H</b><input id="outerHeight" type="text" placeholder="1080"></label>
+        <label class="f"><b>Inner W</b><input id="innerWidth" type="text" placeholder="1920"></label>
+        <label class="f"><b>Inner H</b><input id="innerHeight" type="text" placeholder="937"></label>
+      </div>
+      <div class="g2">
+        <label class="f"><b>Screen X</b><input id="screenX" type="text" placeholder="0"></label>
+        <label class="f"><b>Screen Y</b><input id="screenY" type="text" placeholder="0"></label>
+      </div>
 
-<!-- SETTINGS TAB -->
-<div class="tab-panel" id="tab-io">
-  <div class="sec">Import Fingerprint Settings</div>
-  <label class="f"><b>Format</b>
-    <select id="importFormat">
-      <option value="json">JSON</option>
-      <option value="netscape">Netscape</option>
-    </select>
-  </label>
-  <textarea id="importTextarea" rows="4" placeholder="Paste JSON or Netscape format here..."></textarea>
-  <div class="btn-row">
-    <button class="btn primary" id="importBtn">&#128229; Import</button>
+      <div class="sec">WebGL</div>
+      <div class="g2">
+        <label class="f"><b>Vendor</b><input id="webglVendor" type="text" placeholder="Google Inc. (Intel)"></label>
+        <label class="f"><b>Renderer</b><input id="webglRenderer" type="text" placeholder="ANGLE (...)"></label>
+      </div>
+      <div class="g2">
+        <label class="f"><b>Version String</b><input id="webglVersion" type="text"
+            placeholder="WebGL 1.0 (OpenGL ES 2.0 Chromium)"></label>
+        <label class="f"><b>GLSL Version</b><input id="webglGlsl" type="text"
+            placeholder="WebGL GLSL ES 1.0 ..."></label>
+      </div>
+      <label class="f"><b>WebGL Fingerprint Seed</b><input id="webglFingerprint" type="text"
+          placeholder="seed / hash"></label>
+
+      <div class="sec">Canvas &amp; Audio</div>
+      <label class="chk"><input type="checkbox" id="canvasNoise"> Inject Canvas Noise</label>
+      <div class="g3" style="margin-top:6px">
+        <label class="f"><b>Canvas Intensity</b><input id="canvasNoiseLevel" type="text" placeholder="0.1"></label>
+        <label class="f"><b>Canvas FP Seed</b><input id="canvasFingerprint" type="text" placeholder="seed"></label>
+        <label class="f"><b>Canvas Pattern</b><input id="canvasPattern" type="text" placeholder="pattern"></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="audioNoise"> Inject Audio Context Noise</label>
+      <div class="g2" style="margin-top:6px">
+        <label class="f"><b>Audio Intensity</b><input id="audioNoiseLevel" type="text" placeholder="0.0001"></label>
+        <label class="f"><b>Audio FP Seed</b><input id="audioSeed" type="text" placeholder="seed"></label>
+      </div>
+
+      <div class="sec">Timezone &amp; Network</div>
+      <div class="g2">
+        <label class="f"><b>Timezone</b>
+          <select id="timezone">
+            <option value="">Real Timezone</option>
+            <option value="America/New_York">America/New_York</option>
+            <option value="America/Los_Angeles">America/Los_Angeles</option>
+            <option value="America/Chicago">America/Chicago</option>
+            <option value="Europe/London">Europe/London</option>
+            <option value="Europe/Berlin">Europe/Berlin</option>
+            <option value="Europe/Paris">Europe/Paris</option>
+            <option value="Asia/Tokyo">Asia/Tokyo</option>
+            <option value="Asia/Shanghai">Asia/Shanghai</option>
+            <option value="Asia/Dubai">Asia/Dubai</option>
+            <option value="Australia/Sydney">Australia/Sydney</option>
+          </select>
+        </label>
+        <label class="f"><b>Connection Type</b>
+          <select id="connectionType">
+            <option value="">Real Value</option>
+            <option value="4g">4g</option>
+            <option value="3g">3g</option>
+            <option value="2g">2g</option>
+            <option value="wifi">wifi</option>
+            <option value="ethernet">ethernet</option>
+          </select>
+        </label>
+      </div>
+      <div class="g3">
+        <label class="f"><b>Downlink Mbps</b><input id="downlink" type="text" placeholder="10"></label>
+        <label class="f"><b>RTT ms</b><input id="rtt" type="text" placeholder="100"></label>
+        <label class="f"><b>Save Data</b>
+          <select id="saveData">
+            <option value="">Real</option>
+            <option value="false">false</option>
+            <option value="true">true</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="sec">Battery &amp; Geo</div>
+      <label class="chk"><input type="checkbox" id="spoofBattery"> Spoof Battery Status</label>
+      <div class="g4" style="margin-top:6px">
+        <label class="f"><b>Level (0–1)</b><input id="batteryLevel" type="text" placeholder="0.87"></label>
+        <label class="f"><b>Charging</b>
+          <select id="batteryCharging">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </label>
+        <label class="f"><b>Charge Time</b><input id="chargingTime" type="text" placeholder="Infinity"></label>
+        <label class="f"><b>Discharge (s)</b><input id="dischargingTime" type="text" placeholder="3600"></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="spoofGeo"> Spoof Geolocation</label>
+      <div class="g3" style="margin-top:6px">
+        <label class="f"><b>Latitude</b><input id="geoLat" type="text" placeholder="40.7128"></label>
+        <label class="f"><b>Longitude</b><input id="geoLon" type="text" placeholder="-74.0060"></label>
+        <label class="f"><b>Accuracy m</b><input id="geoAccuracy" type="text" placeholder="10"></label>
+      </div>
+
+      <div class="sec">Plugins, Fonts &amp; Media</div>
+      <label class="f"><b>Plugins (comma-separated)</b><input id="plugins" type="text"
+          placeholder="PDF Viewer, Chrome PDF Viewer"></label>
+      <label class="f"><b>MIME Types (comma-separated)</b><input id="mimeTypes" type="text"
+          placeholder="application/pdf, text/pdf"></label>
+      <div class="g2">
+        <label class="f"><b>Audio Input Label</b><input id="audioInput" type="text"
+            placeholder="Default Microphone"></label>
+        <label class="f"><b>Video Input Label</b><input id="videoInput" type="text"
+            placeholder="Default Camera"></label>
+      </div>
+      <label class="f"><b>Font List Override (comma-separated)</b>
+        <textarea id="fontList" rows="2" placeholder="Arial, Helvetica, Times New Roman, ..."></textarea>
+      </label>
+    </div>
+
+    <!-- COOKIES TAB -->
+    <div class="tab-panel" id="tab-ck">
+      <div class="sec">Paste &amp; Import Cookies</div>
+      <div class="g2">
+        <label class="f"><b>Format</b>
+          <select id="cookieFormat">
+            <option value="auto">Auto-Detect</option>
+            <option value="netscape">Netscape (TSV)</option>
+            <option value="json_array">JSON Array</option>
+            <option value="json_obj">JSON Object</option>
+            <option value="editthiscookie">EditThisCookie</option>
+            <option value="header">HTTP Cookie Header</option>
+            <option value="raw">Raw key=value</option>
+          </select>
+        </label>
+        <label class="f"><b>Filter by Domain</b><input id="cookieDomainFilter" type="text"
+            placeholder=".example.com"></label>
+      </div>
+      <textarea id="cookiePaste" rows="4"
+        placeholder="Paste cookies in any format...&#10;Netscape, JSON, EditThisCookie, raw key=value, HTTP header"></textarea>
+      <div class="btn-row">
+        <button class="btn primary" id="parseCookiesBtn">&#128270; Parse</button>
+        <button class="btn ok" id="injectCookiesBtn">&#9654; Inject to Tab</button>
+        <button class="btn" id="clearCookiePasteBtn">&#128465; Clear</button>
+        <button class="btn bad" id="clearTabCookiesBtn">&#128683; Clear Tab</button>
+      </div>
+
+      <div class="sec">
+        <span>Cookie Table <span id="cookieCount" style="color:#5b7fff;font-weight:400"></span></span>
+        <div style="display:flex;gap:5px;align-items:center">
+          <input id="cookieSearch" type="text" placeholder="Search..."
+            style="width:90px;padding:2px 6px;font-size:11px">
+          <select id="cookieSort" style="font-size:11px;padding:2px 4px">
+            <option value="name">Name</option>
+            <option value="domain">Domain</option>
+            <option value="expires">Expires</option>
+            <option value="value">Value</option>
+          </select>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-col="name">Name</th>
+              <th data-col="value">Value</th>
+              <th data-col="domain">Domain</th>
+              <th data-col="expires">Expires</th>
+              <th>Flags</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="cookieTableBody">
+            <tr>
+              <td colspan="6" style="text-align:center;color:#94a3b8;padding:10px">Paste and parse cookies above</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="exportCookiesJsonBtn">&#128228; JSON</button>
+        <button class="btn" id="exportCookiesNetscapeBtn">&#128228; Netscape</button>
+        <button class="btn" id="exportCookiesHeaderBtn">&#128228; Header</button>
+      </div>
+
+      <div class="sec">Cookie History</div>
+      <div class="g2">
+        <input id="cookieHistoryName" type="text" placeholder="Name this cookie set...">
+        <button class="btn ok" id="saveCookieHistoryBtn">&#128190; Save Set</button>
+      </div>
+      <div id="cookieHistoryList" style="margin-top:6px">
+        <div style="color:#94a3b8;font-size:11px;padding:4px 0">No saved sets yet.</div>
+      </div>
+      <div class="g3">
+        <select id="autofillProfileSelect">
+          <option value="">— Load —</option>
+        </select>
+        </label>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" id="applyAutofillBtn">&#9654; Enable Autofill</button>
+        <button class="btn ok" id="saveAutofillBtn">&#128190; Save Profile</button>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="tab-panel" id="tab-io">
+      <div class="sec">Import Fingerprint Settings</div>
+      <label class="f"><b>Format</b>
+        <select id="importFormat">
+          <option value="json">JSON</option>
+          <option value="netscape">Netscape</option>
+        </select>
+      </label>
+      <textarea id="importTextarea" rows="4" placeholder="Paste JSON or Netscape format here..."></textarea>
+      <div class="btn-row">
+        <button class="btn primary" id="importBtn">&#128229; Import</button>
+      </div>
+
+      <div class="sec">Export</div>
+      <div class="btn-row">
+        <button class="btn" id="exportJsonBtn">&#128196; JSON</button>
+        <button class="btn" id="exportNetscapeBtn">&#128196; Netscape</button>
+      </div>
+      <textarea id="exportOutput" rows="4" readonly style="margin-top:7px;font-family:monospace;font-size:11px"
+        placeholder="Export output appears here..."></textarea>
+    </div>
+
+    <div id="status"></div>
+    <div class="bar">
+      <button class="btn primary" id="applyBtn">&#9654; Apply</button>
+      <button class="btn" id="setBtn">&#128190; Save</button>
+      <button class="btn bad" id="clearBtn">&#128465; Clear</button>
+    </div>
+
   </div>
-
-  <div class="sec">Export</div>
-  <div class="btn-row">
-    <button class="btn" id="exportJsonBtn">&#128196; JSON</button>
-    <button class="btn" id="exportNetscapeBtn">&#128196; Netscape</button>
-  </div>
-  <textarea id="exportOutput" rows="4" readonly style="margin-top:7px;font-family:monospace;font-size:11px" placeholder="Export output appears here..."></textarea>
-</div>
-
-<div id="status"></div>
-<div class="bar">
-  <button class="btn primary" id="applyBtn">&#9654; Apply</button>
-  <button class="btn" id="setBtn">&#128190; Save</button>
-  <button class="btn bad" id="clearBtn">&#128465; Clear</button>
-</div>
-
-</div><!-- /popup-frame -->
-
-<!-- Chrome API stubs for web preview -->
-<script>
-window.chrome = {
-  tabs: {
-    query: (opts, cb) => cb([{ id: 0, url: window.location.href }]),
-  },
-  scripting: {
-    executeScript: ({ func, args }) => {
-      try { func(...(args || [])); } catch(e) { console.warn('executeScript stub:', e); }
-      return Promise.resolve();
-    },
-  },
-  storage: {
-    sync: {
-      get: (keys, cb) => {
-        const result = {};
-        const stored = localStorage.getItem('fp_sync');
-        if (stored) try { Object.assign(result, JSON.parse(stored)); } catch(e) {}
-        cb(result);
-      },
-      set: (obj) => {
-        const stored = localStorage.getItem('fp_sync');
-        const existing = stored ? JSON.parse(stored) : {};
-        localStorage.setItem('fp_sync', JSON.stringify({ ...existing, ...obj }));
-      },
-    },
-    local: {
-      get: (keys, cb) => cb({}),
-      set: () => {},
-    },
-  },
-  runtime: {
-    sendMessage: (msg) => {
-      if (msg && msg.action === 'log') console.log('[stub]', msg.message);
-      if (msg && msg.action === 'injectCookies') {
-        (msg.cookies || []).forEach(c => {
-          try { document.cookie = `${c.name}=${c.value}; path=${c.path || '/'}`; } catch(e) {}
-        });
-      }
-    },
-    onMessage: { addListener: () => {} },
-  },
-};
-</script>
-<script src="popup.js"></script>
+  <script src="popup.js"></script>
 </body>
+
 </html>
