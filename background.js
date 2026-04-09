@@ -2,6 +2,15 @@ const STORAGE_KEY = 'fingerprintProfiles';
 const ACTIVE_PROFILE_KEY = 'activeProfile';
 const SAVED_SETTINGS_KEY = 'savedSettings';
 
+// Keep-alive logic
+function keepAlive() {
+  setInterval(() => {
+    chrome.runtime.getPlatformInfo(function (info) {
+      console.log('Keeping service worker alive. Platform: ' + info.os);
+    });
+  }, 20000);
+}
+
 const defaultProfiles = {
   chrome: {
     name: 'Chrome Windows',
