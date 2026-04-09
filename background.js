@@ -2,15 +2,6 @@ const STORAGE_KEY = 'fingerprintProfiles';
 const ACTIVE_PROFILE_KEY = 'activeProfile';
 const SAVED_SETTINGS_KEY = 'savedSettings';
 
-// Keep-alive logic
-function keepAlive() {
-  setInterval(() => {
-    chrome.runtime.getPlatformInfo(function (info) {
-      console.log('Keeping service worker alive. Platform: ' + info.os);
-    });
-  }, 20000);
-}
-
 const defaultProfiles = {
   chrome: {
     name: 'Chrome Windows',
@@ -118,77 +109,65 @@ async function applyProfile(profileName) {
 function log(msg) { console.log(`[Background] ${msg}`); }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  switch (request.action) {
-    case 'saveProfile':
-      saveProfiles(request.profiles).then(() => {
+  const handleMessage = async () => {
+    switch (request.action) {
+      case 'saveProfile':
+        await saveProfiles(request.profiles);
         log('Profiles saved.');
-        sendResponse({ status: 'Profiles saved' });
-      });
-      return true;
+        return { status: 'Profiles saved' };
 
-    case 'saveSettings':
-      saveSettingsToStorage(request.settings).then(() => {
+      case 'saveSettings':
+        await saveSettingsToStorage(request.settings);
         log('Settings saved to storage.');
-        sendResponse({ status: 'Settings saved' });
-      });
-      return true;
+        return { status: 'Settings saved' };
 
-    case 'setActiveProfile':
-      setActiveProfile(request.profileName).then(() => {
+      case 'setActiveProfile':
+        await setActiveProfile(request.profileName);
         log(`Active profile set to ${request.profileName}`);
-        sendResponse({ status: 'Active profile set' });
-      });
-      return true;
+        return { status: 'Active profile set' };
 
-    case 'getProfiles':
-      getStorage().then((storage) => {
-        sendResponse({ profiles: storage[STORAGE_KEY] || defaultProfiles });
-      });
-      return true;
+      case 'getProfiles':
+        const storageGet = await getStorage();
+        return { profiles: storageGet[STORAGE_KEY] || defaultProfiles };
 
-    case 'getActiveProfile':
-      getActiveProfile().then((profileName) => {
-        sendResponse({ profileName });
-      });
-      return true;
+      case 'getActiveProfile':
+        const activeName = await getActiveProfile();
+        return { profileName: activeName };
 
-    case 'applyProfile':
-      applyProfile(request.profileName);
-      sendResponse({ status: 'Applying profile' });
-      return true;
+      case 'applyProfile':
+        await applyProfile(request.profileName);
+        return { status: 'Applying profile' };
 
-    case 'getSavedSettings':
-      getStorage().then((storage) => {
-        sendResponse({ settings: storage[SAVED_SETTINGS_KEY] || null });
-      });
-      return true;
+      case 'getSavedSettings':
+        const storageVal = await getStorage();
+        return { settings: storageVal[SAVED_SETTINGS_KEY] || null };
 
-    case 'importProfiles':
-      saveProfiles(request.profiles).then(() => {
+      case 'importProfiles':
+        await saveProfiles(request.profiles);
         log('Profiles imported.');
-        sendResponse({ status: 'Profiles imported' });
-      });
-      return true;
+        return { status: 'Profiles imported' };
 
-    case 'exportProfiles':
-      getStorage().then((storage) => {
-        sendResponse({ profiles: storage[STORAGE_KEY] || defaultProfiles });
-      });
-      return true;
+      case 'exportProfiles':
+        const storageEx = await getStorage();
+        return { profiles: storageEx[STORAGE_KEY] || defaultProfiles };
 
-    case 'log':
-      log(request.message);
-      sendResponse({ status: 'Logged' });
-      break;
+      case 'log':
+        log(request.message);
+        return { status: 'Logged' };
 
-    default:
-      log(`Unknown action: ${request.action}`);
-  }
+      default:
+        log(`Unknown action: ${request.action}`);
+        return { status: 'Unknown action' };
+    }
+  };
+
+  handleMessage().then(sendResponse);
+  return true; 
 });
-
-initializeProfiles();
 
 chrome.runtime.onInstalled.addListener(() => {
   log('Extension installed. Initializing profiles...');
   initializeProfiles();
 });
+
+initializeProfiles();
