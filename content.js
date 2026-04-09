@@ -1,7 +1,14 @@
 (function () {
+  'use strict';
+
   function def(obj, prop, val) {
     try {
-      Object.defineProperty(obj, prop, { get: () => val, configurable: true, enumerable: true });
+      Object.defineProperty(obj, prop, { 
+        get: () => val, 
+        set: () => {}, 
+        configurable: true, 
+        enumerable: true 
+      });
     } catch (e) {}
   }
 
@@ -11,7 +18,6 @@
     // ==================== NAVIGATOR IDENTITY ====================
     if (s.userAgent) def(navigator, 'userAgent', s.userAgent);
     if (s.platform)  def(navigator, 'platform', s.platform);
-    if (s.vendor)    def(navigator, 'vendor', s.vendor);
     if (s.appName)   def(navigator, 'appName', s.appName);
     if (s.appVersion) def(navigator, 'appVersion', s.appVersion);
     if (s.product)   def(navigator, 'product', s.product);
@@ -200,15 +206,8 @@
         },
         timestamp: Date.now(),
       };
-      const origGetCurrentPosition = navigator.geolocation.getCurrentPosition.bind(navigator.geolocation);
-      navigator.geolocation.getCurrentPosition = function (success, error, opts) {
-        success(fakePosition);
-      };
-      const origWatchPosition = navigator.geolocation.watchPosition.bind(navigator.geolocation);
-      navigator.geolocation.watchPosition = function (success, error, opts) {
-        success(fakePosition);
-        return 0;
-      };
+      navigator.geolocation.getCurrentPosition = function (success) { success(fakePosition); };
+      navigator.geolocation.watchPosition = function (success) { success(fakePosition); return 0; };
     }
 
     // ==================== PLUGINS ====================
@@ -243,22 +242,11 @@
       });
       def(navigator, 'mimeTypes', mimeArray);
     }
-
-    // ==================== COOKIES ====================
-    if (s.cookies) {
-      s.cookies.split(';').forEach(pair => {
-        const [k, ...rest] = pair.trim().split('=');
-        if (k) {
-          try { document.cookie = `${k.trim()}=${rest.join('=').trim()}; path=/`; } catch (e) {}
-        }
-      });
-    }
   }
 
   // ==================== CANVAS NOISE HELPERS ====================
   function seededRandom(seed) {
-    let s = seed % 2147483647;
-    if (s <= 0) s += 2147483646;
+    let s = (seed || "0").split('').reduce((a, c) => a + c.charCodeAt(0), 0) % 2147483647;
     return function () { return (s = s * 16807 % 2147483647) / 2147483647; };
   }
 
@@ -273,7 +261,7 @@
   }
 
   function noiseImageData(imgData, amount, seed) {
-    const rand = seed ? seededRandom(seed.split('').reduce((a, c) => a + c.charCodeAt(0), 0)) : Math.random;
+    const rand = seed ? seededRandom(seed) : Math.random;
     const data = imgData.data;
     const intensity = Math.floor(amount * 10) || 1;
     for (let i = 0; i < data.length; i += 4) {
@@ -284,42 +272,19 @@
     }
   }
 
-  // ==================== COOKIE INJECTION ====================
-  function injectCookies(cookies) {
-    if (!Array.isArray(cookies)) return;
-    cookies.forEach(c => {
-      let str = `${encodeURIComponent(c.name)}=${encodeURIComponent(c.value)}`;
-      if (c.path) str += `; path=${c.path}`;
-      if (c.expires) str += `; expires=${new Date(c.expires).toUTCString()}`;
-      if (c.domain) str += `; domain=${c.domain}`;
-      if (c.sameSite) str += `; SameSite=${c.sameSite}`;
-      try { document.cookie = str; } catch (e) {}
-    });
-  }
-
   // ==================== AUTOFILL ====================
   let _autofillProfile = null;
-
   const AUTOFILL_SELECTORS = {
-    name:      ['input[name*="name" i]:not([name*="user" i]):not([name*="card" i])','input[autocomplete*="name"]','input[placeholder*="name" i]'],
-    email:     ['input[type="email"]','input[name*="email" i]','input[autocomplete="email"]'],
-    username:  ['input[name*="user" i]','input[name*="login" i]','input[autocomplete="username"]'],
-    phone:     ['input[type="tel"]','input[name*="phone" i]','input[name*="mobile" i]'],
-    street:    ['input[name*="address" i]','input[autocomplete*="street" i]','input[placeholder*="street" i]'],
-    city:      ['input[name*="city" i]','input[autocomplete="address-level2"]'],
-    state:     ['input[name*="state" i]','input[autocomplete="address-level1"]'],
-    zip:       ['input[name*="zip" i]','input[name*="postal" i]','input[autocomplete="postal-code"]'],
-    country:   ['select[name*="country" i]','input[name*="country" i]'],
-    cardName:  ['input[name*="holder" i]','input[name*="card" i][name*="name" i]','input[autocomplete="cc-name"]'],
-    cardNum:   ['input[name*="card" i][name*="num" i]','input[name*="cardnumber" i]','input[autocomplete="cc-number"]'],
-    cardExpiry:['input[name*="expir" i]','input[autocomplete="cc-exp"]'],
-    cardCvv:   ['input[name*="cvv" i]','input[name*="cvc" i]','input[name*="security" i]','input[autocomplete="cc-csc"]'],
+    name: ['input[name*="name" i]','input[autocomplete*="name"]'],
+    email: ['input[type="email"]','input[name*="email" i]','input[autocomplete="email"]'],
+    username: ['input[name*="user" i]','input[autocomplete="username"]'],
+    phone: ['input[type="tel"]','input[name*="phone" i]'],
+    zip: ['input[name*="zip" i]','input[autocomplete="postal-code"]']
   };
 
   function fillField(el, value) {
     if (!el || !value) return;
-    const nv = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value') ||
-               Object.getOwnPropertyDescriptor(window.HTMLSelectElement.prototype, 'value');
+    const nv = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value');
     if (nv && nv.set) nv.set.call(el, value);
     else el.value = value;
     el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -329,7 +294,6 @@
   function tryAutofill(e) {
     if (!_autofillProfile) return;
     const target = e.target;
-    if (!target || !['INPUT', 'SELECT'].includes(target.tagName)) return;
     for (const [key, selectors] of Object.entries(AUTOFILL_SELECTORS)) {
       if (selectors.some(sel => { try { return target.matches(sel); } catch { return false; } })) {
         fillField(target, _autofillProfile[key]);
@@ -338,30 +302,16 @@
     }
   }
 
-  function setupAutofill(profile) {
-    _autofillProfile = profile;
-    document.removeEventListener('focus', tryAutofill, true);
-    if (profile) {
-      document.addEventListener('focus', tryAutofill, true);
-    }
-  }
-
-  // ==================== MESSAGE LISTENER ====================
   chrome.runtime.onMessage.addListener((request) => {
     if (request.action === 'applySettings') {
       applySettings(request.settings);
-    } else if (request.action === 'injectCookies') {
-      injectCookies(request.cookies);
     } else if (request.action === 'setupAutofill') {
-      setupAutofill(request.profile);
+      _autofillProfile = request.profile;
+      document.addEventListener('focus', tryAutofill, true);
     }
   });
 
-  // Auto-apply saved settings on page load
   chrome.storage.sync.get(['savedSettings'], (result) => {
-    if (result.savedSettings) {
-      applySettings(result.savedSettings);
-    }
+    if (result.savedSettings) applySettings(result.savedSettings);
   });
-
 })();
